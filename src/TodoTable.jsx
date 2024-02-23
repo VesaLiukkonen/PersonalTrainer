@@ -1,6 +1,8 @@
 import React from "react";
+import TodoList from "./TodoList";
 
 function TodoTable(props) {
+    const { todos, deleteTodo } = props;
 
     return <>
         <table>
@@ -13,6 +15,9 @@ function TodoTable(props) {
                     <tr key={index}>
                         <td>{item.date}</td>
                         <td>{item.desc}</td>
+                        <td>
+                            <button onClick={() => deleteTodo(index)}>Delete</button>
+                        </td>
                     </tr>
                 ))}
             </tbody>

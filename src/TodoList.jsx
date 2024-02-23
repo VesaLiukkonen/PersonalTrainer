@@ -15,6 +15,12 @@ function TodoList() {
         setTodo({ date: '', desc: '' });
     };
 
+    const deleteTodo = (index) => {
+        const updatedTodos = todos.filter((todo, i) => i !== index);
+        setTodos(updatedTodos);
+    };
+
+
     return (
         <>
             <h1>Simple Todolist</h1>
@@ -24,7 +30,7 @@ function TodoList() {
                 Date:<input type="date" name="date" onChange={handleChange} value={todo.date} />
                 <button onClick={addTodo}>Add</button></div>
             <div className="todo-list">
-                <TodoTable todos={todos} />
+                <TodoTable todos={todos} deleteTodo={deleteTodo} />
             </div>
         </>
     );
