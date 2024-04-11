@@ -13,9 +13,20 @@ import { Tab as BaseTab, tabClasses } from '@mui/base/Tab';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import dayjs from 'dayjs';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+
+import AddCustomer from './AddCustomer';
+import EditCustomer from './EditCustomer';
+import AddTraining from './AddTraining';
+import EditTraining from './EditTraining';
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-material.css";
+import 'ag-grid-community/styles/ag-theme-alpine.css';
 
 function CustomerList() {
 
@@ -54,6 +65,96 @@ function CustomerList() {
 
     };
 
+    const saveCustomer = (customer) => {
+        fetch('https://customerrestservice-personaltraining.rahtiapp.fi/api/customers', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(customer)
+        })
+            .then(res => fetchData())
+            .catch(err => console.error(err))
+    };
+
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setOpen(false);
+    };
+
+    const saveTraining = (training) => {
+        fetch('https://customerrestservice-personaltraining.rahtiapp.fi/api/trainings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(training)
+        })
+            .then(res => fetchData())
+            .catch(err => console.error(err))
+    };
+
+    const action = (
+        <React.Fragment>
+            <Button color="secondary" size="small" onClick={handleClose}>
+                UNDO
+            </Button>
+            {/*<IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={handleClose}
+            >
+                <CloseIcon fontSize="small" />
+    </IconButton>*/}
+        </React.Fragment>
+    );
+
+    const deleteCustomer = (customerUrl) => {
+          if (window.confirm('Are you sure?')) {
+            fetch(customerUrl, { method: 'DELETE' }) //gridRef.current.getSelectedNodes()[0].data._links.self.href
+              .then(res => fetchData())
+              .catch(err => console.error(err))
+            setOpen(true);
+          }
+      };
+
+      const deleteTraining = (trainingUrl) => {
+        if (window.confirm('Are you sure?')) {
+          fetch(trainingUrl, { method: 'DELETE' }) //gridRef.current.getSelectedNodes()[0].data._links.self.href
+            .then(res => fetchData())
+            .catch(err => console.error(err))
+          setOpen(true);
+        }
+    };
+    
+      const updateCustomer = (customer, link) => {
+        fetch(link, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(customer)
+        })
+          .then(res => fetchData())
+          .catch(err => console.error(err))
+      };
+
+      /*const updateTraining = (training, link) => {
+        fetch(link, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(training)
+        })
+          .then(res => fetchData())
+          .catch(err => console.error(err))
+      };*/
+
 
     const [columnDefs, setColumnDefs] = useState([
         { field: 'firstname', filter: "floating" },
@@ -63,6 +164,15 @@ function CustomerList() {
         { field: 'city', filter: "floating" },
         { field: 'email', filter: "floating" },
         { field: 'phone', filter: "floating" },
+        {
+            headerName: 'Actions',
+            cellRenderer: (params) => (
+            <div>
+                <Button variant="outlined" color='error' onClick={() => deleteCustomer(params.data._links.self.href)}>Delete</Button>
+                <EditCustomer customer={params.data} updateCustomer={updateCustomer}/>
+            </div>
+            )   
+        },
     ]);
 
     const [columnDefs2, setColumnDefs2] = useState([
@@ -70,6 +180,15 @@ function CustomerList() {
         { field: 'duration', filter: "floating" },
         { field: 'activity', filter: "floating" },
         { headerName: 'Customer', field: 'customer', filter: "floating" },
+        {
+            headerName: 'Actions',
+            cellRenderer: (params) => (
+                <div>
+                <Button variant="outlined" color='error' onClick={() => deleteTraining(params.data._links.self.href)}>Delete</Button>
+                {/*<EditTraining training={params.data} trainingCustomer={params.data._links.customer.href}updateTraining={updateTraining} customers={customers}/>*/}
+                </div>
+            )   
+        },
     ]);
 
 
@@ -81,12 +200,12 @@ function CustomerList() {
         font-weight: 600;
         background-color: transparent;
         width: 100%;
-        padding: 10px 12px;
+        padding: 5px 5px;
         margin: 6px;
-        border: none;
+        border: 6px;
         border-radius: 7px;
         display: flex;
-        justify-content: left;
+        justify-content: center;
 
     &.${buttonClasses.disabled} {
         opacity: 0.5;
@@ -99,33 +218,37 @@ function CustomerList() {
         width: 100%;
         font-family: 'IBM Plex Sans', sans-serif;
         font-size: 0.875rem;
-        padding: 20px 12px;
-        border-radius: 12px;
+        padding: 5px 5px;
+        border-radius: 5px;
+        justify-content: center;
+        align-items: center;
         opacity: 0.6;
         `,
     );
 
     const TabsList = styled(BaseTabsList)(
         ({ theme }) => `
-        min-width: 400px;
-        border-radius: 12px;
-        margin-bottom: 16px;
+        min-width: 100%;
+        border-radius: 4px;
+        margin-bottom: 4px;
         display: flex;
-        align-items: left;
-        justify-content: left;
+        align-items: center;
+        justify-content: center;
         align-content: space-between;
         `,
     );
 
 
     return (
+    <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" >
         <Tabs defaultValue={0}>
             <TabsList>
                 <Tab value={0}>Customers</Tab>
                 <Tab value={1}>Trainings</Tab>
             </TabsList>
             <TabPanel value={1}>
-                <div className="ag-theme-material" align='left' style={{ width: 1400, height: 1000 }}>
+                <AddTraining saveTraining={saveTraining} customers={customers}/>
+                <div className="ag-theme-material" align='left' style={{ width: '100vw', height: 1000, margin: '0 auto' }}>
                     <AgGridReact filterable={true}
                         ref={gridRef}
                         onGridReady={params => gridRef.current = params.api}
@@ -136,7 +259,8 @@ function CustomerList() {
                 </div>
             </TabPanel>
             <TabPanel value={0}>
-                <div className="ag-theme-material" align='left' style={{ width: 1400, height: 1000 }}>
+                <AddCustomer saveCustomer={saveCustomer} />
+                <div className="ag-theme-material" align='left' style={{ width: '100vw', height: 1000, }}>
                     <AgGridReact filterable={true}
                         ref={gridRef}
                         onGridReady={params => gridRef.current = params.api}
@@ -147,6 +271,7 @@ function CustomerList() {
                 </div>
             </TabPanel>
         </Tabs>
+    </Box>
     );
 
 
