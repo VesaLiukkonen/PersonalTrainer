@@ -18,11 +18,15 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import { Calendar, momentLocalizer } from "react-big-calendar";
+import moment from 'moment';
 
 import AddCustomer from './AddCustomer';
 import EditCustomer from './EditCustomer';
 import AddTraining from './AddTraining';
-import EditTraining from './EditTraining';
+//import EditTraining from './EditTraining';
+import MyCalendar from './MyCalendar';
+import DownloadCSV from './DownloadCSV';
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-material.css";
@@ -33,6 +37,7 @@ function CustomerList() {
     const [customers, setCustomers] = useState([]);
     const [trainings, setTrainings] = useState([]);
     const [training, setTraining] = useState({});
+    const [events, setEvents] = useState({});
     const gridRef = useRef();
     //const formattedDate = dayjs(new Date()).format('DD.MM.YYYY HH:mm');
 
@@ -59,10 +64,20 @@ function CustomerList() {
                 });
                 Promise.all(fetchCustomerDataPromises)
                     .then(trainingsWithCustomerData => {
+                        const events = trainingsWithCustomerData.map(training => {
+                            const startTime = moment(training.date);
+                            const endTime = startTime.clone().add(parseInt(training.duration), 'minutes');
+                            return {
+                                id: training.id,
+                                title: training.activity + ' / ' + training.customer, // Remove duplicate key
+                                start: startTime.toDate(),
+                                end: endTime.toDate(),
+                            };
+                        });
                         setTrainings(trainingsWithCustomerData);
+                        setEvents(events);
                     });
-            });
-
+            })
     };
 
     const saveCustomer = (customer) => {
@@ -114,46 +129,46 @@ function CustomerList() {
     );
 
     const deleteCustomer = (customerUrl) => {
-          if (window.confirm('Are you sure?')) {
-            fetch(customerUrl, { method: 'DELETE' }) //gridRef.current.getSelectedNodes()[0].data._links.self.href
-              .then(res => fetchData())
-              .catch(err => console.error(err))
-            setOpen(true);
-          }
-      };
-
-      const deleteTraining = (trainingUrl) => {
         if (window.confirm('Are you sure?')) {
-          fetch(trainingUrl, { method: 'DELETE' }) //gridRef.current.getSelectedNodes()[0].data._links.self.href
-            .then(res => fetchData())
-            .catch(err => console.error(err))
-          setOpen(true);
+            fetch(customerUrl, { method: 'DELETE' }) //gridRef.current.getSelectedNodes()[0].data._links.self.href
+                .then(res => fetchData())
+                .catch(err => console.error(err))
+            setOpen(true);
         }
     };
-    
-      const updateCustomer = (customer, link) => {
-        fetch(link, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(customer)
-        })
-          .then(res => fetchData())
-          .catch(err => console.error(err))
-      };
 
-      /*const updateTraining = (training, link) => {
+    const deleteTraining = (trainingUrl) => {
+        if (window.confirm('Are you sure?')) {
+            fetch(trainingUrl, { method: 'DELETE' }) //gridRef.current.getSelectedNodes()[0].data._links.self.href
+                .then(res => fetchData())
+                .catch(err => console.error(err))
+            setOpen(true);
+        }
+    };
+
+    const updateCustomer = (customer, link) => {
         fetch(link, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(training)
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(customer)
         })
-          .then(res => fetchData())
-          .catch(err => console.error(err))
-      };*/
+            .then(res => fetchData())
+            .catch(err => console.error(err))
+    };
+
+    /*const updateTraining = (training, link) => {
+      fetch(link, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(training)
+      })
+        .then(res => fetchData())
+        .catch(err => console.error(err))
+    };*/
 
 
     const [columnDefs, setColumnDefs] = useState([
@@ -167,11 +182,11 @@ function CustomerList() {
         {
             headerName: 'Actions',
             cellRenderer: (params) => (
-            <div>
-                <Button variant="outlined" color='error' onClick={() => deleteCustomer(params.data._links.self.href)}>Delete</Button>
-                <EditCustomer customer={params.data} updateCustomer={updateCustomer}/>
-            </div>
-            )   
+                <div>
+                    <Button variant="outlined" color='error' onClick={() => deleteCustomer(params.data._links.self.href)}>Delete</Button>
+                    <EditCustomer customer={params.data} updateCustomer={updateCustomer} />
+                </div>
+            )
         },
     ]);
 
@@ -184,28 +199,29 @@ function CustomerList() {
             headerName: 'Actions',
             cellRenderer: (params) => (
                 <div>
-                <Button variant="outlined" color='error' onClick={() => deleteTraining(params.data._links.self.href)}>Delete</Button>
-                {/*<EditTraining training={params.data} trainingCustomer={params.data._links.customer.href}updateTraining={updateTraining} customers={customers}/>*/}
+                    <Button variant="outlined" color='error' onClick={() => deleteTraining(params.data._links.self.href)}>Delete</Button>
+                    {/*<EditTraining training={params.data} trainingCustomer={params.data._links.customer.href}updateTraining={updateTraining} customers={customers}/>*/}
                 </div>
-            )   
+            )
         },
     ]);
 
 
     const Tab = styled(BaseTab)`
         font-family: 'IBM Plex Sans', sans-serif;
-        olor: #000000;
+        color: #424242;
         cursor: pointer;
         font-size: 0.875rem;
         font-weight: 600;
         background-color: transparent;
-        width: 100%;
+        width: 100px;
         padding: 5px 5px;
-        margin: 6px;
-        border: 6px;
-        border-radius: 7px;
+        margin: 5px;
+        border: 5px;
+        border-radius: 8px;
         display: flex;
         justify-content: center;
+        outline: 2px solid #007bff;
 
     &.${buttonClasses.disabled} {
         opacity: 0.5;
@@ -240,38 +256,45 @@ function CustomerList() {
 
 
     return (
-    <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" >
-        <Tabs defaultValue={0}>
-            <TabsList>
-                <Tab value={0}>Customers</Tab>
-                <Tab value={1}>Trainings</Tab>
-            </TabsList>
-            <TabPanel value={1}>
-                <AddTraining saveTraining={saveTraining} customers={customers}/>
-                <div className="ag-theme-material" align='left' style={{ width: '100vw', height: 1000, margin: '0 auto' }}>
-                    <AgGridReact filterable={true}
-                        ref={gridRef}
-                        onGridReady={params => gridRef.current = params.api}
-                        rowData={trainings}
-                        columnDefs={columnDefs2}
-                        rowSelection="single"
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" >
+            <Tabs defaultValue={0}>
+                <TabsList>
+                    <Tab value={0}>Customers</Tab>
+                    <Tab value={1}>Trainings</Tab>
+                    <Tab value={2}>Calendar</Tab>
+                </TabsList>
+                <TabPanel value={1}>
+                    <AddTraining saveTraining={saveTraining} customers={customers} />
+                    <div className="ag-theme-material" align='left' style={{ width: '100vw', height: 1000, margin: '0 auto' }}>
+                        <AgGridReact filterable={true}
+                            ref={gridRef}
+                            onGridReady={params => gridRef.current = params.api}
+                            rowData={trainings}
+                            columnDefs={columnDefs2}
+                            rowSelection="single"
+                        />
+                    </div>
+                </TabPanel>
+                <TabPanel value={0}>
+                    <DownloadCSV customers={customers} fileName="customers" />
+                    <AddCustomer saveCustomer={saveCustomer} />
+                    <div className="ag-theme-material" align='left' style={{ width: '100vw', height: 1000, }}>
+                        <AgGridReact filterable={true}
+                            ref={gridRef}
+                            onGridReady={params => gridRef.current = params.api}
+                            rowData={customers}
+                            columnDefs={columnDefs}
+                            rowSelection="single"
+                        />
+                    </div>
+                </TabPanel>
+                <TabPanel value={2}>
+                    <MyCalendar
+                        events={events}
                     />
-                </div>
-            </TabPanel>
-            <TabPanel value={0}>
-                <AddCustomer saveCustomer={saveCustomer} />
-                <div className="ag-theme-material" align='left' style={{ width: '100vw', height: 1000, }}>
-                    <AgGridReact filterable={true}
-                        ref={gridRef}
-                        onGridReady={params => gridRef.current = params.api}
-                        rowData={customers}
-                        columnDefs={columnDefs}
-                        rowSelection="single"
-                    />
-                </div>
-            </TabPanel>
-        </Tabs>
-    </Box>
+                </TabPanel>
+            </Tabs>
+        </Box>
     );
 
 

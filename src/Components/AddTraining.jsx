@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+//import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -48,7 +49,7 @@ export default function AddTraining(props) {
             >
                 <DialogTitle id="form-dialog-title">New training</DialogTitle>
                 <DialogContent>
-                    <DatePicker
+                    <DateTimePicker
                         label="Date"
                         value={training.date}
                         onChange={e => handleDateChange(e)}
