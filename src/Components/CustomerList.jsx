@@ -1,30 +1,20 @@
 import { useState, useEffect, useRef } from "react";
 import * as React from 'react';
 import { AgGridReact } from "ag-grid-react";
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { styled } from '@mui/system';
 import { Tabs } from '@mui/base/Tabs';
 import { TabsList as BaseTabsList } from '@mui/base/TabsList';
 import { TabPanel as BaseTabPanel } from '@mui/base/TabPanel';
 import { buttonClasses } from '@mui/base/Button';
-import { Tab as BaseTab, tabClasses } from '@mui/base/Tab';
-import TextField from '@mui/material/TextField';
+import { Tab as BaseTab } from '@mui/base/Tab';
 import Box from '@mui/material/Box';
 import dayjs from 'dayjs';
 import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from 'moment';
 
 import AddCustomer from './AddCustomer';
 import EditCustomer from './EditCustomer';
 import AddTraining from './AddTraining';
-//import EditTraining from './EditTraining';
 import MyCalendar from './MyCalendar';
 import DownloadCSV from './DownloadCSV';
 
@@ -39,7 +29,6 @@ function CustomerList() {
     const [training, setTraining] = useState({});
     const [events, setEvents] = useState({});
     const gridRef = useRef();
-    //const formattedDate = dayjs(new Date()).format('DD.MM.YYYY HH:mm');
 
     useEffect(() => fetchData(), []);
 
@@ -75,7 +64,7 @@ function CustomerList() {
                             const endTime = startTime.clone().add(parseInt(training.duration), 'minutes');
                             return {
                                 id: training.id,
-                                title: training.activity + ' / ' + training.customer, // Remove duplicate key
+                                title: training.activity + ' / ' + training.customer,
                                 start: startTime.toDate(),
                                 end: endTime.toDate(),
                             };
@@ -123,20 +112,12 @@ function CustomerList() {
             <Button color="secondary" size="small" onClick={handleClose}>
                 UNDO
             </Button>
-            {/*<IconButton
-                size="small"
-                aria-label="close"
-                color="inherit"
-                onClick={handleClose}
-            >
-                <CloseIcon fontSize="small" />
-    </IconButton>*/}
         </React.Fragment>
     );
 
     const deleteCustomer = (customerUrl) => {
         if (window.confirm('Are you sure?')) {
-            fetch(customerUrl, { method: 'DELETE' }) //gridRef.current.getSelectedNodes()[0].data._links.self.href
+            fetch(customerUrl, { method: 'DELETE' })
                 .then(res => fetchData())
                 .catch(err => console.error(err))
             setOpen(true);
@@ -145,7 +126,7 @@ function CustomerList() {
 
     const deleteTraining = (trainingUrl) => {
         if (window.confirm('Are you sure?')) {
-            fetch(trainingUrl, { method: 'DELETE' }) //gridRef.current.getSelectedNodes()[0].data._links.self.href
+            fetch(trainingUrl, { method: 'DELETE' })
                 .then(res => fetchData())
                 .catch(err => console.error(err))
             setOpen(true);
@@ -163,18 +144,6 @@ function CustomerList() {
             .then(res => fetchData())
             .catch(err => console.error(err))
     };
-
-    /*const updateTraining = (training, link) => {
-      fetch(link, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(training)
-      })
-        .then(res => fetchData())
-        .catch(err => console.error(err))
-    };*/
 
 
     const [columnDefs, setColumnDefs] = useState([
@@ -215,7 +184,6 @@ function CustomerList() {
             cellRenderer: (params) => (
                 <div>
                     <Button variant="outlined" color='error' onClick={() => deleteTraining(params.data._links.self.href)}>Delete</Button>
-                    {/*<EditTraining training={params.data} trainingCustomer={params.data._links.customer.href}updateTraining={updateTraining} customers={customers}/>*/}
                 </div>
             )
         },
