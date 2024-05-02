@@ -59,7 +59,13 @@ function CustomerList() {
                         .then(response => response.json())
                         .then(customerData => ({
                             ...training,
-                            customer: customerData.firstname + ' ' + customerData.lastname
+                            customer: customerData.firstname + ' ' + customerData.lastname ? 
+                            customerData.firstname + ' ' + customerData.lastname : 
+                            "No name"
+                        }))
+                        .catch(error => ({
+                            ...training,
+                            customer: "No name"
                         }));
                 });
                 Promise.all(fetchCustomerDataPromises)
@@ -194,7 +200,16 @@ function CustomerList() {
         { field: 'date', valueFormatter: params => dayjs(params.value).format('DD.MM.YYYY HH:mm'), filter: "floating" },
         { field: 'duration', filter: "floating" },
         { field: 'activity', filter: "floating" },
-        { headerName: 'Customer', field: 'customer', filter: "floating" },
+        {
+            headerName: 'Customer',
+            field: 'customer',
+            filter: "floating",
+            cellRenderer: (params) => (
+                <div>
+                    {params.value ? params.value : "No name"}
+                </div>
+            )
+        },
         {
             headerName: 'Actions',
             cellRenderer: (params) => (
